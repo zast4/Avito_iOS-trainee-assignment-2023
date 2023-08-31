@@ -20,22 +20,25 @@ protocol AdManagerDelegate {
 }
 
 struct AdManager {
+    public func fetchAds(completion: @escaping (Result<NetworkAds, Error>) -> ()) {
+        let urlString = mainWindowURL
+        request(with: urlString, type: RequestType.mainWindow, completion: completion)
+    }
+
+    public func fetchAdDetailed(
+        id: String,
+        completion: @escaping (Result<NetworkAdDetailed, Error>) -> ()
+    ) {
+        let urlString = "\(detailedWindowURL)\(id).json"
+        request(with: urlString, type: RequestType.detailedWindow, completion: completion)
+    }
+
     let mainWindowURL = "https://www.avito.st/s/interns-ios/main-page.json"
     let detailedWindowURL = "https://www.avito.st/s/interns-ios/details/"
 
     var delegate: AdManagerDelegate?
 
     var advertisementDetailed: AdDetailed?
-
-    func fetchAdDetailed(id: String) {
-        let urlString = "\(detailedWindowURL)\(id).json"
-        request(with: urlString, type: RequestType.detailedWindow)
-    }
-
-    func fetchAds() {
-        let urlString = mainWindowURL
-        request(with: urlString, type: RequestType.mainWindow)
-    }
 
     func parseDetailedWindowJSON(_ networkAdDetailed: Data) -> AdDetailed? {
         let decoder = JSONDecoder()
@@ -77,15 +80,52 @@ struct AdManager {
         case detailedWindow
     }
 
-    private func request(with urlString: String, type requestType: RequestType) {
+    private func request<T>(
+        with urlString: String,
+        type requestType: RequestType,
+        completion: @escaping (Result<T, Error>) -> ()
+    ) where T: Decodable {
         // 1. Create a URL
         if let url = URL(string: urlString) {
+            let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 3)
             // 2. Create a URLSession
             let session = URLSession(configuration: .default)
             // 3. Give the session a task
-            let task = session.dataTask(with: url) { data, response, error in
-                if error != nil {
-                    self.delegate?.didFailWithError(error: error!)
+            let task = session.dataTask(with: request) { data, response, error in
+
+                if let error = error {
+                    if (error as NSError).code == NSURLErrorTimedOut {
+                        let timeoutError = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut, userInfo: nil)
+                        DispatchQueue.main.async {
+                            completion(.failure(timeoutError))
+                        }
+                    } else {
+                        DispatchQueue.main.async {
+                            completion(.failure(error))
+                        }
+                    }
+                    // self.delegate?.didFailWithError(error: error!)
+                    return
+                }
+                
+                guard let httpResponse = response as? HTTPURLResponse else {
+                    print("response не может быть приведен к типу ﻿HTTPURLResponse")
+                    DispatchQueue.main.async {
+                        completion(.failure(URLError(.badServerResponse)))
+                    }
+                    return
+                }
+                
+                let statusCode = httpResponse.statusCode
+                
+                guard (200 ..< 300).contains(statusCode) else {
+                    let errorDescription = HTTPURLResponse.localizedString(forStatusCode: statusCode)
+                    let userInfo = [NSLocalizedDescriptionKey: errorDescription]
+                    let httpError = NSError(domain: "HTTP", code: statusCode, userInfo: userInfo)
+                    print("HTTP-статус код ответа на запрос не находится в диапазоне успешных (200-299)")
+                    DispatchQueue.main.async {
+                        completion(.failure(httpError))
+                    }
                     return
                 }
 

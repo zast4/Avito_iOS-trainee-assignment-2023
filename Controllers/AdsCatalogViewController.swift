@@ -86,7 +86,14 @@ extension AdsCatalogViewController {
     }
 
     private func fetchDataForAdCollectionView() {
-        adManager.fetchAds()
+        adManager.fetchAds() { [weak self] result in
+            switch result {
+            case let .failure(error):
+                print("Interner error")
+            case let .success(_):
+                print("No error")
+            }
+        }
     }
 }
 
@@ -127,7 +134,7 @@ extension AdsCatalogViewController: AdManagerDelegate {
     }
 
     func didFailWithError(error: Error) {
-        print(error)
+        print("didFailWithError AdsCatalogViewController")
     }
 }
 

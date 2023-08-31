@@ -14,8 +14,20 @@ class AdDetailedViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .systemBackground
         adManager.delegate = self
+        fetchAdDetailedData()
+        
+    }
+    
+    private func fetchAdDetailedData() {
         if let adID = adID {
-            adManager.fetchAdDetailed(id: adID)
+            adManager.fetchAdDetailed(id: adID) { [weak self] result in
+                switch result {
+                case let .failure(error):
+                    print("Interner error")
+                case let .success(_):
+                    print("No error")
+                }
+            }
         }
     }
 
@@ -209,7 +221,7 @@ extension AdDetailedViewController: AdManagerDelegate {
     }
     
     func didFailWithError(error: Error) {
-        print(error)
+        print("didFailWithError")
     }
     
     
