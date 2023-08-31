@@ -90,6 +90,14 @@ extension AdsCatalogViewController {
             switch result {
             case let .failure(error):
                 print("Interner error")
+                self?.showAlert(title: "Error", message: "Отсутствует подключение к сети или происходит проблема с установлением соединения с сервером")
+                { index in
+                    if index == 0 {
+                        DispatchQueue.main.async {
+                            UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+                        }
+                    }
+                }
             case let .success(_):
                 print("No error")
             }

@@ -23,9 +23,18 @@ class AdDetailedViewController: UIViewController {
             adManager.fetchAdDetailed(id: adID) { [weak self] result in
                 switch result {
                 case let .failure(error):
-                    print("Interner error")
-                case let .success(_):
-                    print("No error")
+                    self?.showAlert(title: "Error",
+                                   message: "Отсутствует подключение к сети или происходит проблема с установлением соединения с сервером")
+                    { index in
+                        if index == 0 {
+                            DispatchQueue.main.async {
+                                UIApplication.shared.perform(#selector(NSXPCConnection.suspend))
+                            }
+                        }
+                    }
+                    print("Interner error in detailed")
+                case .success(_):
+                    break
                 }
             }
         }
