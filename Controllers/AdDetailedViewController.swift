@@ -52,6 +52,18 @@ class AdDetailedViewController: UIViewController {
     private lazy var imageService = ImageService()
 
     // MARK: - UI Elements
+    
+    private let scrollView: UIScrollView = {
+        let view = UIScrollView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
+
+    private let contentView: UIView = {
+        let view = UIView()
+        view.translatesAutoresizingMaskIntoConstraints = false
+        return view
+    }()
 
     private let adImageView: UIImageView = {
         let view = UIImageView()
@@ -77,7 +89,7 @@ class AdDetailedViewController: UIViewController {
 
     private let adTitleLabel: UILabel = {
         let label = UILabel()
-        label.font = .systemFont(ofSize: 18)
+        label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = .label
         label.translatesAutoresizingMaskIntoConstraints = false
         return label
@@ -150,18 +162,24 @@ class AdDetailedViewController: UIViewController {
         setupConstraints()
     }
 
-    private func setupSubviews() { // more readable than array with foreach
-        view.addSubview(adImageView)
-        view.addSubview(adPlaceholder)
-        view.addSubview(adPriceLabel)
-        view.addSubview(adTitleLabel)
-        view.addSubview(adAddressLabel)
-        view.addSubview(descriptionLabel)
-        view.addSubview(adDescriptionLabel)
-        view.addSubview(contactsLabel)
-        view.addSubview(adEmailLabel)
-        view.addSubview(adPhoneNumberLabel)
-        view.addSubview(adCreatedDateLabel)
+    private func setupSubviews() {
+        view.addSubview(scrollView)
+        scrollView.addSubview(contentView)
+        [
+            adImageView,
+            adPlaceholder,
+            adPriceLabel,
+            adTitleLabel,
+            adAddressLabel,
+            descriptionLabel,
+            adDescriptionLabel,
+            contactsLabel,
+            adEmailLabel,
+            adPhoneNumberLabel,
+            adCreatedDateLabel
+        ].forEach { view in
+            contentView.addSubview(view)
+        }
     }
 
     private func setAttributes(_ adDetailed: AdDetailed) {
@@ -186,18 +204,29 @@ class AdDetailedViewController: UIViewController {
 
     private func setupConstraints() {
         NSLayoutConstraint.activate([
+            scrollView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+            scrollView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            scrollView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            scrollView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+            
+            contentView.topAnchor.constraint(equalTo: scrollView.topAnchor),
+            contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
+            contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
+            contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
+            contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
+            
             adImageView.widthAnchor.constraint(equalToConstant: view.frame.width),
             adImageView.heightAnchor.constraint(equalToConstant: view.frame.width),
-            adImageView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            adImageView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            adImageView.topAnchor.constraint(equalTo: contentView.topAnchor),
+            adImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
 
             adPlaceholder.widthAnchor.constraint(equalToConstant: view.frame.width),
             adPlaceholder.heightAnchor.constraint(equalToConstant: view.frame.width),
-            adPlaceholder.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            adPlaceholder.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            adPlaceholder.topAnchor.constraint(equalTo: contentView.topAnchor),
+            adPlaceholder.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
 
             adPriceLabel.topAnchor.constraint(equalTo: adImageView.bottomAnchor, constant: 12),
-            adPriceLabel.leadingAnchor.constraint(equalTo: adImageView.leadingAnchor, constant: 12),
+            adPriceLabel.leadingAnchor.constraint(equalTo: adImageView.leadingAnchor, constant: 15),
 
             adTitleLabel.leadingAnchor.constraint(equalTo: adPriceLabel.leadingAnchor),
             adTitleLabel.topAnchor.constraint(equalTo: adPriceLabel.bottomAnchor, constant: 6),
@@ -223,6 +252,7 @@ class AdDetailedViewController: UIViewController {
 
             adCreatedDateLabel.topAnchor.constraint(equalTo: adPhoneNumberLabel.bottomAnchor, constant: 16),
             adCreatedDateLabel.leadingAnchor.constraint(equalTo: adPhoneNumberLabel.leadingAnchor),
+            adCreatedDateLabel.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -50)
         ])
     }
 }
