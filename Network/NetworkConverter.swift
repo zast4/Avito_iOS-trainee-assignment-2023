@@ -8,8 +8,8 @@
 import Foundation
 
 struct NetworkConverter {
-    static public func networkAdToAd(_ networkAd: NetworkAdvertisement) -> Advertisement {
-        let ad = Advertisement(
+    static public func networkAdToAd(_ networkAd: NetworkAd) -> Ad {
+        let ad = Ad(
             id: networkAd.id,
             title: networkAd.title,
             price: networkAd.price,
@@ -20,13 +20,13 @@ struct NetworkConverter {
         return ad
     }
     
-    static public func networkAdsToAds(_ networkAds: NetworkAdvertisements) -> Advertisements {
-        return Advertisements(advertisements: networkAds.advertisements.map { networkAdToAd($0) })
+    static public func networkAdsToAds(_ networkAds: NetworkAds) -> Ads {
+        return Ads(advertisements: networkAds.advertisements.map { networkAdToAd($0) })
     }
 
-    static public func networkAdDetailedToAdDetailed(_ networkAdDetailed: NetworkAdvertisementDetailed)
-        -> AdvertisementDetailed {
-        let adDetailed = AdvertisementDetailed(
+    static public func networkAdDetailedToAdDetailed(_ networkAdDetailed: NetworkAdDetailed)
+        -> AdDetailed {
+        let adDetailed = AdDetailed(
             id: networkAdDetailed.id,
             title: networkAdDetailed.title,
             price: networkAdDetailed.price,

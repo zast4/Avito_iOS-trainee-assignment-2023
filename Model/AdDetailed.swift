@@ -1,5 +1,5 @@
 //
-//  Product.swift
+//  AdvertisementDetailed.swift
 //  Avito
 //
 //  Created by Даниил on 30.08.2023.
@@ -7,15 +7,15 @@
 
 import Foundation
 
-struct Advertisement {
+struct AdDetailed { // Advertisement from detailed info card
     var id: String
     var title: String
     var price: String
     var location: String
     var imageUrl: URL
     var createdDate: Date
-}
-
-struct Advertisements {
-    var advertisements: [Advertisement]
+    var description: String
+    var email: String
+    var phoneNumber: String
+    var address: String
 }

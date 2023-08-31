@@ -7,65 +7,65 @@
 
 import Foundation
 
-protocol AdvertisementManagerDelegate {
-    func loadAdvertisements(
-        _ advertisementManager: AdvertisementManager,
-        advertisements: Advertisements
+protocol AdManagerDelegate {
+    func loadAds(
+        _ advertisementManager: AdManager,
+        ads: Ads
     )
-    func loadAdvertisementDetailed(
-        _ advertisementManager: AdvertisementManager,
-        advertisementDetailed: AdvertisementDetailed
+    func loadAdDetailed(
+        _ advertisementManager: AdManager,
+        adDetailed: AdDetailed
     )
     func didFailWithError(error: Error)
 }
 
-struct AdvertisementManager {
+struct AdManager {
     let mainWindowURL = "https://www.avito.st/s/interns-ios/main-page.json"
     let detailedWindowURL = "https://www.avito.st/s/interns-ios/details/"
 
-    var delegate: AdvertisementManagerDelegate?
+    var delegate: AdManagerDelegate?
 
-    var advertisementDetailed: AdvertisementDetailed?
+    var advertisementDetailed: AdDetailed?
 
-    func fetchAdvertisementDetailed(id: String) {
+    func fetchAdDetailed(id: String) {
         let urlString = "\(detailedWindowURL)\(id).json"
-        request(with: urlString, requestType: .detailedWindow)
+        request(with: urlString, type: RequestType.detailedWindow)
     }
 
-    func fetchAdvertisements() {
+    func fetchAds() {
         let urlString = mainWindowURL
-        request(with: urlString, requestType: .mainWindow)
+        request(with: urlString, type: RequestType.mainWindow)
     }
 
-    func parseDetailedWindowJSON(_ networkAdvertisementDetailed: Data) -> AdvertisementDetailed? {
+    func parseDetailedWindowJSON(_ networkAdDetailed: Data) -> AdDetailed? {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         do {
             let networkAdDetailed = try decoder.decode(
-                NetworkAdvertisementDetailed.self,
-                from: networkAdvertisementDetailed
+                NetworkAdDetailed.self,
+                from: networkAdDetailed
             )
 
-            let advertisementDetailed = NetworkConverter
+            let adDetailed = NetworkConverter
                 .networkAdDetailedToAdDetailed(networkAdDetailed)
-            return advertisementDetailed
+            return adDetailed
         } catch {
             delegate?.didFailWithError(error: error)
             return nil
         }
     }
 
-    func parseMainWindowJSON(_ networkAdvertisements: Data) -> Advertisements? {
+    func parseMainWindowJSON(_ networkAds: Data) -> Ads? {
         let decoder = JSONDecoder()
         decoder.keyDecodingStrategy = .convertFromSnakeCase
         do {
-            let networkAdvertisements = try decoder.decode(
-                NetworkAdvertisements.self,
-                from: networkAdvertisements
+            let networkAds = try decoder.decode(
+                NetworkAds.self,
+                from: networkAds
             )
-            
-            let advertisements = NetworkConverter.networkAdsToAds(networkAdvertisements)
-            return advertisements
+
+            let ads = NetworkConverter.networkAdsToAds(networkAds)
+            return ads
         } catch {
             delegate?.didFailWithError(error: error)
             return nil
@@ -77,7 +77,7 @@ struct AdvertisementManager {
         case detailedWindow
     }
 
-    private func request(with urlString: String, requestType: RequestType) {
+    private func request(with urlString: String, type requestType: RequestType) {
         // 1. Create a URL
         if let url = URL(string: urlString) {
             // 2. Create a URLSession
@@ -91,20 +91,17 @@ struct AdvertisementManager {
 
                 if let safeData = data { // Parse JSON here
                     switch requestType {
-                    case .detailedWindow:
+                    case RequestType.detailedWindow:
                         if let advertisementDetailed = self.parseDetailedWindowJSON(safeData) {
-                            print("Detailed Window \(urlString)")
-                            self.delegate?.loadAdvertisementDetailed(
+                            self.delegate?.loadAdDetailed(
                                 self,
-                                advertisementDetailed: advertisementDetailed
+                                adDetailed: advertisementDetailed
                             )
                         }
-                    case .mainWindow:
+                    case RequestType.mainWindow:
                         if let advertisements = self.parseMainWindowJSON(safeData) {
-                            print("Detailed Window \(urlString)")
-                            self.delegate?.loadAdvertisements(self, advertisements: advertisements)
+                            self.delegate?.loadAds(self, ads: advertisements)
                         }
-                        print("Main Window \(urlString)")
                     }
                 }
             }
