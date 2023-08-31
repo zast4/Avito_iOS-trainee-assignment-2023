@@ -1,5 +1,5 @@
 //
-//  Product.swift
+//  Ad.swift
 //  Avito
 //
 //  Created by Даниил on 30.08.2023.

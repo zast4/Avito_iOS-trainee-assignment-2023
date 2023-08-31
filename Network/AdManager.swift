@@ -8,15 +8,9 @@
 import Foundation
 
 protocol AdManagerDelegate {
-    func loadAds(
-        _ advertisementManager: AdManager,
-        ads: Ads
-    )
-    func loadAdDetailed(
-        _ advertisementManager: AdManager,
-        adDetailed: AdDetailed
-    )
-    func didFailWithError(error: Error)
+    func loadAds(_ adManager: AdManager, ads: Ads)
+    
+    func loadAdDetailed(_ adManager: AdManager, adDetailed: AdDetailed)
 }
 
 struct AdManager {
@@ -34,6 +28,7 @@ struct AdManager {
     }
 
     let mainWindowURL = "https://www.avito.st/s/interns-ios/main-page.json"
+
     let detailedWindowURL = "https://www.avito.st/s/interns-ios/details/"
 
     var delegate: AdManagerDelegate?
@@ -53,7 +48,6 @@ struct AdManager {
                 .networkAdDetailedToAdDetailed(networkAdDetailed)
             return adDetailed
         } catch {
-            delegate?.didFailWithError(error: error)
             return nil
         }
     }
@@ -70,14 +64,13 @@ struct AdManager {
             let ads = NetworkConverter.networkAdsToAds(networkAds)
             return ads
         } catch {
-            delegate?.didFailWithError(error: error)
             return nil
         }
     }
 
     private enum RequestType {
-        case mainWindow
-        case detailedWindow
+        case mainWindow // Request for main window
+        case detailedWindow // Request for advertisement detailed card
     }
 
     private func request<T>(
@@ -87,7 +80,11 @@ struct AdManager {
     ) where T: Decodable {
         // 1. Create a URL
         if let url = URL(string: urlString) {
-            let request = URLRequest(url: url, cachePolicy: .useProtocolCachePolicy, timeoutInterval: 3)
+            let request = URLRequest(
+                url: url,
+                cachePolicy: .useProtocolCachePolicy,
+                timeoutInterval: 3
+            )
             // 2. Create a URLSession
             let session = URLSession(configuration: .default)
             // 3. Give the session a task
@@ -95,7 +92,11 @@ struct AdManager {
 
                 if let error = error {
                     if (error as NSError).code == NSURLErrorTimedOut {
-                        let timeoutError = NSError(domain: NSURLErrorDomain, code: NSURLErrorTimedOut, userInfo: nil)
+                        let timeoutError = NSError(
+                            domain: NSURLErrorDomain,
+                            code: NSURLErrorTimedOut,
+                            userInfo: nil
+                        )
                         DispatchQueue.main.async {
                             completion(.failure(timeoutError))
                         }
@@ -107,29 +108,8 @@ struct AdManager {
                     // self.delegate?.didFailWithError(error: error!)
                     return
                 }
-                
-                guard let httpResponse = response as? HTTPURLResponse else {
-                    print("response не может быть приведен к типу ﻿HTTPURLResponse")
-                    DispatchQueue.main.async {
-                        completion(.failure(URLError(.badServerResponse)))
-                    }
-                    return
-                }
-                
-                let statusCode = httpResponse.statusCode
-                
-                guard (200 ..< 300).contains(statusCode) else {
-                    let errorDescription = HTTPURLResponse.localizedString(forStatusCode: statusCode)
-                    let userInfo = [NSLocalizedDescriptionKey: errorDescription]
-                    let httpError = NSError(domain: "HTTP", code: statusCode, userInfo: userInfo)
-                    print("HTTP-статус код ответа на запрос не находится в диапазоне успешных (200-299)")
-                    DispatchQueue.main.async {
-                        completion(.failure(httpError))
-                    }
-                    return
-                }
 
-                if let safeData = data { // Parse JSON here
+                if let safeData = data { // JSON parsing
                     switch requestType {
                     case RequestType.detailedWindow:
                         if let advertisementDetailed = self.parseDetailedWindowJSON(safeData) {
