@@ -1,7 +1,15 @@
 # Тестовое задание для стажёра iOS
 
 ### Инструкция по запуску
-1. 
+1. Двойное нажатие по Avito.xcodeproj
+2. Cmd + R
+
+### Приложение
+Main Screen                |  Main screen loading      | Main screen error |
+:-------------------------:|:-------------------------:|:-------------------------:|
+![](Screenshots/1_main_screen.png)  |  ![](Screenshots/2_main_screen_loading.png) | ![](Screenshots/3_main_screen_error.png)
+**Detailed screen**                |  **Detailed screen loading**      | **Detailed screen error** |
+![](Screenshots/4_detailed_screen.png)  |  ![](Screenshots/5_detailed_screen_loading.png) | ![](Screenshots/6_detailed_screen_error.png)
 
 ### Общее описание задания:
 Написать приложение для iOS, которое будет состоять из двух экранов: 

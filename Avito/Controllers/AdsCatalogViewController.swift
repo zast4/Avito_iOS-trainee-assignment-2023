@@ -16,7 +16,7 @@ class AdsCatalogViewController: UIViewController {
         super.viewDidLoad()
         adManager.delegate = self
 
-        fetchDataForAdCollectionView()
+        self.fetchDataForAdCollectionView()
 
         adCollectionView.dataSource = self
         adCollectionView.delegate = self
